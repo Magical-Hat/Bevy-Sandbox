@@ -1,5 +1,5 @@
 use bevy::{color::palettes::basic::PURPLE, prelude::*};
-use bevy::window::{PrimaryWindow, WindowResolution};
+use bevy::window::{PrimaryWindow};
 
 #[derive(Component)]
 struct PrimaryCamera;

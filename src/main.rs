@@ -1,6 +1,6 @@
 mod sand;
 
-use bevy::{color::palettes::basic::PURPLE, prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*};
 use sand::*;
 
 fn main() {
