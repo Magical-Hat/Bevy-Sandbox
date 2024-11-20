@@ -2,7 +2,7 @@ use bevy::{color::palettes::basic::PURPLE, prelude::*};
 use bevy::window::{PrimaryWindow};
 
 #[derive(Component)]
-struct PrimaryCamera;
+pub struct PrimaryCamera;
 
 pub fn draw_2d_sprite(
     mut commands: Commands,
@@ -63,45 +63,21 @@ pub fn draw_2d_sprite_where_clicked(
 
 // Tag component for moving entities
 #[derive(Component)]
-struct Moving;
+pub struct Moving;
 
 #[derive(Component)]
-struct Speed(f32);
+pub struct Speed(f32);
 
 pub fn move_2d_sprite(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &Speed, &Sprite), With<Moving>>,
-    mut window: Query<&mut Window>
+    window: Query<&Window>
 ) {
     for (mut transform, speed, sprite) in query.iter_mut() {
         transform.translation.x += speed.0 * time.delta_seconds(); // Adjust speed as needed
         if (transform.translation.x - sprite.custom_size.unwrap().x / 2.0) > window.single().resolution.width() / 2.0 {
             transform.translation.x = -window.single().resolution.width() / 2.0 - sprite.custom_size.unwrap().x / 2.0;
         }
-    }
-}
-
-fn mouse_button_input(
-    buttons: Res<ButtonInput<MouseButton>>,
-    mut query: Query<&mut Speed, With<Moving>>
-) {
-    if buttons.just_pressed(MouseButton::Left) {
-        for mut speed in &mut query {
-            speed.0 *= 2.0;
-        }
-    }
-
-    if buttons.just_released(MouseButton::Left) {
-        // Left Button was released
-    }
-
-    if buttons.pressed(MouseButton::Right) {
-        // Right Button is being held down
-    }
-
-    // we can check multiple at once with `.any_*`
-    if buttons.any_just_pressed([MouseButton::Left, MouseButton::Middle]) {
-        // Either the left or the middle (wheel) button was just pressed
     }
 }
 
