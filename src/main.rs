@@ -1,3 +1,5 @@
+mod sand;
+
 use bevy::{prelude::*, window::PresentMode};
 use bevy::window::ExitCondition;
 use bevy_rapier2d::prelude::*;
