@@ -1,6 +1,6 @@
 use bevy::math::{Vec2, Vec4};
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Particle {
     pub health: ParticleHealth,
     pub velocity: Vec2,
@@ -9,7 +9,7 @@ pub struct Particle {
     pub updated: bool
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct ParticleHealth {
     pub amount: i32,
 }
