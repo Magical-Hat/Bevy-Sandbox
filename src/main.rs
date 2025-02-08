@@ -1,5 +1,3 @@
-mod sand;
-
 use bevy::{prelude::*, window::PresentMode};
 use bevy::window::ExitCondition;
 use bevy_rapier2d::prelude::*;
@@ -10,7 +8,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Bevy Falling Sand".into(),
+                        title: "Bevy Playground".into(),
                         resolution: (1280., 720.).into(),
                         present_mode: PresentMode::AutoVsync,
                         ..default()
