@@ -1,3 +1,5 @@
+mod sprite;
+
 use bevy::{prelude::*, window::PresentMode};
 use bevy::window::ExitCondition;
 
@@ -18,10 +20,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.1)))
-        .add_systems(Startup, setup)
+        .add_systems(Startup, sprite::setup)
+        .add_systems(Update, sprite::sprite_movement)
         .run();
-}
-
-fn setup(mut commands: Commands) {
-    commands.spawn(Camera2d);
 }
