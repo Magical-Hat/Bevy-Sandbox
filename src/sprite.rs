@@ -24,8 +24,8 @@ pub fn setup(mut commands: Commands) {
     commands.spawn((
         Player,
         Sprite {
-            color: Color::srgb(0.5, 1.0, 0.5),
-            custom_size: Some(Vec2::new(30.0, 50.0)),
+            color: Color::srgb(1.0, 0.75, 0.0),
+            custom_size: Some(Vec2::new(50.0, 50.0)),
             anchor: Anchor::BottomCenter,
             ..default()
         },
@@ -37,7 +37,7 @@ pub fn setup(mut commands: Commands) {
     commands.spawn((
         Tree,
         Sprite {
-            color: Color::srgb(0.0, 0.2, 0.0),
+            color: Color::srgb(0.0, 0.6, 0.1),
             custom_size: Some(Vec2::new(30.0, 30.0)),
             anchor: Anchor::Center,
             ..default()
@@ -56,19 +56,19 @@ pub fn player_input(
         let mut y_movement_pressed = false;
 
         if keys.pressed(KeyCode::KeyD) {
-            velocity.0.x = 150.0;
+            velocity.0.x = 250.0;
             x_movement_pressed = true;
         }
         if keys.pressed(KeyCode::KeyA) {
-            velocity.0.x = -150.0;
+            velocity.0.x = -250.0;
             x_movement_pressed = true;
         }
         if keys.pressed(KeyCode::KeyS) {
-            velocity.0.y = -150.0;
+            velocity.0.y = -250.0;
             y_movement_pressed = true;
         }
         if keys.pressed(KeyCode::KeyW) {
-            velocity.0.y = 150.0;
+            velocity.0.y = 250.0;
             y_movement_pressed = true;
         }
         if !x_movement_pressed {
@@ -86,10 +86,11 @@ pub fn player_movement(
 )
 {
     for (mut transform, mut velocity) in query.iter_mut() {
-        transform.translation.x += velocity.0.x * time.delta_secs();
-        transform.translation.y += velocity.0.y * time.delta_secs();
+        let new_translation_x = transform.translation.x + velocity.0.x * time.delta_secs();
+        let new_translation_y = transform.translation.y + velocity.0.y * time.delta_secs();
 
-        println!("Player movement for {} {:?}", transform.translation.x, transform.translation.y);
+        transform.translation.x = transform.translation.x.lerp(new_translation_x, 0.95);
+        transform.translation.y = transform.translation.y.lerp(new_translation_y, 0.95);
     }
 }
 
@@ -101,5 +102,6 @@ pub fn update_camera(
     let player_transform = player_query.single().0;
     let mut camera_transform = camera_query.single_mut();
 
-    camera_transform.translation = player_transform.translation;
+    camera_transform.translation.x = player_transform.translation.x.lerp(camera_transform.translation.x, 0.95);
+    camera_transform.translation.y = player_transform.translation.y.lerp(camera_transform.translation.y, 0.95);
 }
