@@ -21,6 +21,5 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.1)))
         .add_systems(Startup, sprite::setup)
-        .add_systems(Update, sprite::sprite_movement)
         .run();
 }

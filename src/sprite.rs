@@ -1,33 +1,44 @@
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
+
+const GROUND_LEVEL: f32 = -100.0;
+const PLAYER_X: f32 = -300.0;
 
 #[derive(Component)]
-pub enum Direction {
-    Up,
-    Down,
-}
+struct Player;
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2d);
+#[derive(Component)]
+struct Ground;
+
+#[derive(Component)]
+struct Velocity(Vec2);
+
+
+pub fn setup(mut commands: Commands) {
+    commands.spawn(Camera2d::default());
+
+    // Player
     commands.spawn((
-        Sprite::from_image(asset_server.load("icon.png")),
-        Transform::from_xyz(100., 0., 0.),
-        Direction::Up,
+        Player,
+        Sprite {
+            color: Color::srgb(0.5, 1.0, 0.5),
+            custom_size: Some(Vec2::new(30.0, 50.0)),
+            anchor: Anchor::BottomCenter,
+            ..default()
+        },
+        Transform::from_xyz(PLAYER_X, GROUND_LEVEL, 0.0),
+        Velocity(Vec2::ZERO),
     ));
-}
 
-/// The sprite is animated by changing its translation depending on the time that has passed since
-/// the last frame.
-pub fn sprite_movement(time: Res<Time>, mut sprite_position: Query<(&mut Direction, &mut Transform)>) {
-    for (mut logo, mut transform) in &mut sprite_position {
-        match *logo {
-            Direction::Up => transform.translation.y += 150. * time.delta_secs(),
-            Direction::Down => transform.translation.y -= 150. * time.delta_secs(),
-        }
-
-        if transform.translation.y > 200. {
-            *logo = Direction::Down;
-        } else if transform.translation.y < -200. {
-            *logo = Direction::Up;
-        }
-    }
+    // Ground
+    commands.spawn((
+        Ground,
+        Sprite {
+           color: Color::srgb(0.5, 0.5, 0.5),
+           custom_size: Some(Vec2::new(800.0, 10.0)),
+           anchor: Anchor::TopLeft,
+           ..default()
+        },
+        Transform::from_xyz(-400.0, GROUND_LEVEL, 0.0),
+    ));
 }
