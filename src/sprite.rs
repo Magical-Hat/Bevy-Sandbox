@@ -45,18 +45,34 @@ pub fn setup(mut commands: Commands) {
 
 pub fn player_input(
     keys: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Velocity), With<Player>>,
+    mut query: Query<&mut Velocity, With<Player>>,
 )
 {
-    if let Ok((mut velocity)) = query.get_single_mut() {
+    if let Ok(mut velocity) = query.get_single_mut() {
+        let mut x_movement_pressed = false;
+        let mut y_movement_pressed = false;
+
         if keys.pressed(KeyCode::KeyD) {
             velocity.0.x = 150.0;
+            x_movement_pressed = true;
         }
-        else if keys.pressed(KeyCode::KeyA) {
+        if keys.pressed(KeyCode::KeyA) {
             velocity.0.x = -150.0;
+            x_movement_pressed = true;
         }
-        else {
+        if keys.pressed(KeyCode::KeyS) {
+            velocity.0.y = -150.0;
+            y_movement_pressed = true;
+        }
+        if keys.pressed(KeyCode::KeyW) {
+            velocity.0.y = 150.0;
+            y_movement_pressed = true;
+        }
+        if !x_movement_pressed {
             velocity.0.x = 0.0;
+        }
+        if !y_movement_pressed {
+            velocity.0.y = 0.0;
         }
     }
 }
@@ -68,5 +84,6 @@ pub fn player_movement(
 {
     for (mut transform, mut velocity) in query.iter_mut() {
         transform.translation.x += velocity.0.x * time.delta_secs();
+        transform.translation.y += velocity.0.y * time.delta_secs();
     }
 }
