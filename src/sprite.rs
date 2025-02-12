@@ -1,3 +1,4 @@
+use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
@@ -5,13 +6,13 @@ const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
 
 #[derive(Component)]
-struct Player;
+pub struct Player;
 
 #[derive(Component)]
-struct Ground;
+pub struct Ground;
 
 #[derive(Component)]
-struct Velocity(Vec2);
+pub struct Velocity(Vec2);
 
 
 pub fn setup(mut commands: Commands) {
@@ -41,4 +42,31 @@ pub fn setup(mut commands: Commands) {
         },
         Transform::from_xyz(-400.0, GROUND_LEVEL, 0.0),
     ));
+}
+
+pub fn player_input(
+    mut events: EventReader<KeyboardInput>,
+    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+)
+{
+    for event in events.read() {
+        if let Ok((mut velocity, transform)) = query.get_single_mut() {
+            if event.state.is_pressed() && event.key_code == KeyCode::KeyD {
+                velocity.0.x = 150.0;
+            }
+            if event.state.is_pressed() && event.key_code == KeyCode::KeyA {
+                velocity.0.x = -150.0;
+            }
+        }
+    }
+}
+
+pub fn player_movement(
+    time: Res<Time>,
+    mut query: Query<(&mut Transform, &mut Velocity), With<Player>>
+)
+{
+    for (mut transform, mut velocity) in query.iter_mut() {
+        transform.translation.x += velocity.0.x * time.delta_secs();
+    }
 }
