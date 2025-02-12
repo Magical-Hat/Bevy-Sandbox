@@ -1,4 +1,3 @@
-use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
@@ -45,18 +44,19 @@ pub fn setup(mut commands: Commands) {
 }
 
 pub fn player_input(
-    mut events: EventReader<KeyboardInput>,
-    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut Velocity), With<Player>>,
 )
 {
-    for event in events.read() {
-        if let Ok((mut velocity, transform)) = query.get_single_mut() {
-            if event.state.is_pressed() && event.key_code == KeyCode::KeyD {
-                velocity.0.x = 150.0;
-            }
-            if event.state.is_pressed() && event.key_code == KeyCode::KeyA {
-                velocity.0.x = -150.0;
-            }
+    if let Ok((mut velocity)) = query.get_single_mut() {
+        if keys.pressed(KeyCode::KeyD) {
+            velocity.0.x = 150.0;
+        }
+        else if keys.pressed(KeyCode::KeyA) {
+            velocity.0.x = -150.0;
+        }
+        else {
+            velocity.0.x = 0.0;
         }
     }
 }
