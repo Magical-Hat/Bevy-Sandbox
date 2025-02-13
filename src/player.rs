@@ -1,12 +1,19 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy::window::PrimaryWindow;
+use bevy::core::Name;
 
 const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct Movement {
+    free_move: bool,
+    destination: Vec2
+}
 
 #[derive(Component)]
 pub struct Ground;
@@ -23,7 +30,12 @@ pub fn setup(mut commands: Commands) {
 
     // Player
     commands.spawn((
+        Name::new("Player".to_string()),
         Player,
+        Movement {
+            free_move: false,
+            destination: Vec2::ZERO
+        },
         Sprite {
             color: Color::srgb(1.0, 0.75, 0.0),
             custom_size: Some(Vec2::new(50.0, 50.0)),
@@ -31,7 +43,7 @@ pub fn setup(mut commands: Commands) {
             ..default()
         },
         Transform::from_xyz(PLAYER_X, GROUND_LEVEL, 0.0),
-        Velocity(Vec2::ZERO),
+        Velocity(Vec2::ZERO)
     ));
 
     // One tree?
@@ -85,10 +97,10 @@ pub fn handle_mouse_input(
     buttons: Res<ButtonInput<MouseButton>>,
     window: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
-    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+    mut query: Query<(&mut Movement), With<Player>>,
 )
 {
-    for (mut velocity, transform) in query.iter_mut() {
+    for (movement) in query.iter_mut() {
         if buttons.pressed(MouseButton::Left) {
             if let Some(mouse_position) = window.single().cursor_position() {
                 // Get the camera information
@@ -98,16 +110,9 @@ pub fn handle_mouse_input(
                         camera_transform,
                         mouse_position
                     ) {
-                        println!("World mouse position: {:?}", world_position);
-
-                        let x_velocity_component = (world_position.x - transform.translation.x).min(225.0) + 25.0;
-                        let y_velocity_component = (world_position.y - transform.translation.y).min(225.0) + 25.0;
-
-                        println!("X velocity: {:?}", x_velocity_component);
-                        println!("Y velocity: {:?}", y_velocity_component);
-
-                        velocity.0.x = x_velocity_component;
-                        velocity.0.y = y_velocity_component;
+                        // A world position has been captured, free moving is disabled now while we're targeting a destination.
+                        movement.destination = world_position;
+                        movement.free_move = false;
                     }
                 }
             }
