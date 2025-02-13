@@ -97,10 +97,10 @@ pub fn handle_mouse_input(
     buttons: Res<ButtonInput<MouseButton>>,
     window: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
-    mut query: Query<(&mut Movement), With<Player>>,
+    mut query: Query<&mut Movement, With<Player>>,
 )
 {
-    for (movement) in query.iter_mut() {
+    for (mut movement) in query.iter_mut() {
         if buttons.pressed(MouseButton::Left) {
             if let Some(mouse_position) = window.single().cursor_position() {
                 // Get the camera information
@@ -122,10 +122,10 @@ pub fn handle_mouse_input(
 
 pub fn update_movement(
     time: Res<Time>,
-    mut query: Query<(&mut Transform, &mut Velocity), With<Player>>
+    mut query: Query<(&mut Transform, &Velocity), With<Player>>
 )
 {
-    for (mut transform, mut velocity) in query.iter_mut() {
+    for (mut transform, velocity) in query.iter_mut() {
         let new_translation_x = transform.translation.x + velocity.0.x * time.delta_secs();
         let new_translation_y = transform.translation.y + velocity.0.y * time.delta_secs();
 
