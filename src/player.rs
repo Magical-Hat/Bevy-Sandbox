@@ -126,8 +126,6 @@ pub fn update_movement(
 
         transform.translation.x = transform.translation.x.lerp(new_translation_x, 0.95);
         transform.translation.y = transform.translation.y.lerp(new_translation_y, 0.95);
-
-        //println!("Translation: {:?}", transform.translation);
     }
 }
 
