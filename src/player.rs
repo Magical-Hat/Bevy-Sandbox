@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
+use bevy::window::PrimaryWindow;
 
 const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
@@ -26,7 +27,7 @@ pub fn setup(mut commands: Commands) {
         Sprite {
             color: Color::srgb(1.0, 0.75, 0.0),
             custom_size: Some(Vec2::new(50.0, 50.0)),
-            anchor: Anchor::BottomCenter,
+            anchor: Anchor::Center,
             ..default()
         },
         Transform::from_xyz(PLAYER_X, GROUND_LEVEL, 0.0),
@@ -46,7 +47,7 @@ pub fn setup(mut commands: Commands) {
     ));
 }
 
-pub fn handle_input(
+pub fn handle_key_input(
     keys: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Velocity, With<Player>>,
 )
@@ -80,6 +81,40 @@ pub fn handle_input(
     }
 }
 
+pub fn handle_mouse_input(
+    buttons: Res<ButtonInput<MouseButton>>,
+    window: Query<&Window, With<PrimaryWindow>>,
+    cameras: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
+    mut query: Query<(&mut Velocity, &Transform), With<Player>>,
+)
+{
+    for (mut velocity, transform) in query.iter_mut() {
+        if buttons.pressed(MouseButton::Left) {
+            if let Some(mouse_position) = window.single().cursor_position() {
+                // Get the camera information
+                if let Ok((camera, camera_transform)) = cameras.get_single() {
+                    // Convert window coordinates to world coordinates
+                    if let Ok(world_position) = camera.viewport_to_world_2d(
+                        camera_transform,
+                        mouse_position
+                    ) {
+                        println!("World mouse position: {:?}", world_position);
+
+                        let x_velocity_component = (world_position.x - transform.translation.x).min(225.0) + 25.0;
+                        let y_velocity_component = (world_position.y - transform.translation.y).min(225.0) + 25.0;
+
+                        println!("X velocity: {:?}", x_velocity_component);
+                        println!("Y velocity: {:?}", y_velocity_component);
+
+                        velocity.0.x = x_velocity_component;
+                        velocity.0.y = y_velocity_component;
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn update_movement(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &mut Velocity), With<Player>>
@@ -91,6 +126,8 @@ pub fn update_movement(
 
         transform.translation.x = transform.translation.x.lerp(new_translation_x, 0.95);
         transform.translation.y = transform.translation.y.lerp(new_translation_y, 0.95);
+
+        //println!("Translation: {:?}", transform.translation);
     }
 }
 
