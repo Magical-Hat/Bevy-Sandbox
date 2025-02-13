@@ -1,7 +1,8 @@
-mod sprite;
+mod player;
 
 use bevy::{prelude::*, window::PresentMode};
 use bevy::window::ExitCondition;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {
     App::new()
@@ -19,8 +20,9 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
         )
+        .add_plugins(WorldInspectorPlugin::new())
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.1)))
-        .add_systems(Startup, sprite::setup)
-        .add_systems(Update, (sprite::player_input, sprite::player_movement, sprite::update_camera).chain())
+        .add_systems(Startup, player::setup)
+        .add_systems(Update, (player::handle_input, player::update_movement, player::update_camera).chain())
         .run();
 }

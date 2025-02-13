@@ -46,7 +46,7 @@ pub fn setup(mut commands: Commands) {
     ));
 }
 
-pub fn player_input(
+pub fn handle_input(
     keys: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Velocity, With<Player>>,
 )
@@ -80,7 +80,7 @@ pub fn player_input(
     }
 }
 
-pub fn player_movement(
+pub fn update_movement(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &mut Velocity), With<Player>>
 )
