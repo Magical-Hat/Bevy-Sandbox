@@ -21,6 +21,10 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.1)))
         .add_systems(Startup, player::setup)
-        .add_systems(Update, (player::handle_key_input, player::handle_mouse_input, player::update_movement, player::update_camera).chain())
+        .add_systems(Update, (
+            player::handle_key_input,
+            player::handle_mouse_input, player::update_movement,
+            player::update_camera)
+            .chain())
         .run();
 }

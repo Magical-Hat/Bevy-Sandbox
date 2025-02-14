@@ -5,6 +5,7 @@ use bevy::core::Name;
 
 const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
+const MOVEMENT_SPEED: f32 = 250.0;
 
 #[derive(Component)]
 pub struct Player;
@@ -14,9 +15,6 @@ pub struct Movement {
     free_move: bool,
     destination: Vec2
 }
-
-#[derive(Component)]
-pub struct Ground;
 
 #[derive(Component)]
 pub struct Tree;
@@ -69,22 +67,22 @@ pub fn handle_key_input(
         let mut y_movement_pressed = false;
 
         if keys.pressed(KeyCode::KeyD) {
-            velocity.0.x = 250.0;
+            velocity.0.x = MOVEMENT_SPEED;
             x_movement_pressed = true;
             movement.free_move = true;
         }
         if keys.pressed(KeyCode::KeyA) {
-            velocity.0.x = -250.0;
+            velocity.0.x = -MOVEMENT_SPEED;
             x_movement_pressed = true;
             movement.free_move = true;
         }
         if keys.pressed(KeyCode::KeyS) {
-            velocity.0.y = -250.0;
+            velocity.0.y = -MOVEMENT_SPEED;
             y_movement_pressed = true;
             movement.free_move = true;
         }
         if keys.pressed(KeyCode::KeyW) {
-            velocity.0.y = 250.0;
+            velocity.0.y = MOVEMENT_SPEED;
             y_movement_pressed = true;
             movement.free_move = true;
         }
@@ -104,7 +102,7 @@ pub fn handle_mouse_input(
     mut query: Query<&mut Movement, With<Player>>,
 )
 {
-    for (mut movement) in query.iter_mut() {
+    for mut movement in query.iter_mut() {
         if buttons.pressed(MouseButton::Left) {
             if let Some(mouse_position) = window.single().cursor_position() {
                 // Get the camera information
@@ -114,7 +112,8 @@ pub fn handle_mouse_input(
                         camera_transform,
                         mouse_position
                     ) {
-                        // A world position has been captured, free moving is disabled now while we're targeting a destination.
+                        // A world position has been captured, free moving is disabled now while we're targeting a destination
+                        // to allow for a click move to interrupt a key press move.
                         movement.destination = world_position;
                         movement.free_move = false;
                     }
@@ -129,34 +128,18 @@ pub fn update_movement(
     mut query: Query<(&mut Transform, &Velocity, &mut Movement), With<Player>>,
 )
 {
-    for (mut transform, velocity, mut movement) in query.iter_mut() {
-        let mut new_translation_x = transform.translation.x;
-        let mut new_translation_y = transform.translation.y;
+    for (mut transform, velocity, movement) in query.iter_mut() {
+        let delta = time.delta_secs();
+        let current_pos = Vec2::new(transform.translation.x, transform.translation.y);
 
-        if(movement.free_move) {
-            new_translation_x = transform.translation.x + velocity.0.x * time.delta_secs();
-            new_translation_y = transform.translation.y + velocity.0.y * time.delta_secs();
-        }
-        else {
-            // Determine how much x translation to apply.
-            if(movement.destination.x > transform.translation.x) {
-                new_translation_x = transform.translation.x + 250.0 * time.delta_secs();
-            }
-            else {
-                new_translation_x = transform.translation.x + -250.0 * time.delta_secs();
-            }
+        let new_pos = if movement.free_move {
+            current_pos + velocity.0 * delta
+        } else {
+            current_pos + (movement.destination - current_pos).normalize() * MOVEMENT_SPEED * delta
+        };
 
-            // Determine how much y translation to apply
-            if(movement.destination.y > transform.translation.y) {
-                new_translation_y = transform.translation.y + 250.0 * time.delta_secs();
-            }
-            else {
-                new_translation_y = transform.translation.y + -250.0 * time.delta_secs();
-            }
-        }
-
-        transform.translation.x = transform.translation.x.lerp(new_translation_x, 0.95);
-        transform.translation.y = transform.translation.y.lerp(new_translation_y, 0.95);
+        transform.translation.x = transform.translation.x.lerp(new_pos.x, 0.95);
+        transform.translation.y = transform.translation.y.lerp(new_pos.y, 0.95);
     }
 }
 
