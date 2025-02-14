@@ -63,34 +63,18 @@ pub fn handle_key_input(
 )
 {
     for (mut velocity, mut movement) in query.iter_mut() {
-        let mut x_movement_pressed = false;
-        let mut y_movement_pressed = false;
+        let mut direction = Vec2::ZERO;
 
-        if keys.pressed(KeyCode::KeyD) {
-            velocity.0.x = MOVEMENT_SPEED;
-            x_movement_pressed = true;
+        if keys.pressed(KeyCode::KeyW) { direction.y += 1.0; }
+        if keys.pressed(KeyCode::KeyA) { direction.x -= 1.0; }
+        if keys.pressed(KeyCode::KeyS) { direction.y -= 1.0; }
+        if keys.pressed(KeyCode::KeyD) { direction.x += 1.0; }
+
+        if direction != Vec2::ZERO {
+            velocity.0 = direction.normalize() * MOVEMENT_SPEED;
             movement.free_move = true;
-        }
-        if keys.pressed(KeyCode::KeyA) {
-            velocity.0.x = -MOVEMENT_SPEED;
-            x_movement_pressed = true;
-            movement.free_move = true;
-        }
-        if keys.pressed(KeyCode::KeyS) {
-            velocity.0.y = -MOVEMENT_SPEED;
-            y_movement_pressed = true;
-            movement.free_move = true;
-        }
-        if keys.pressed(KeyCode::KeyW) {
-            velocity.0.y = MOVEMENT_SPEED;
-            y_movement_pressed = true;
-            movement.free_move = true;
-        }
-        if !x_movement_pressed {
-            velocity.0.x = 0.0;
-        }
-        if !y_movement_pressed {
-            velocity.0.y = 0.0;
+        } else {
+            velocity.0 = Vec2::ZERO;
         }
     }
 }
