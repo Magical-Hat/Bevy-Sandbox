@@ -23,8 +23,10 @@ fn main() {
         .add_systems(Startup, player::setup)
         .add_systems(Update, (
             player::handle_key_input,
-            player::handle_mouse_input, player::update_movement,
-            player::update_camera)
+            player::handle_mouse_input,
+            player::update_camera,
+            player::check_for_collisions,
+            player::update_movement)
             .chain())
         .run();
 }

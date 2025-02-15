@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy::window::PrimaryWindow;
 use bevy::core::Name;
+use bevy::math::bounding::{BoundingCircle, IntersectsVolume};
 
 const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
@@ -18,6 +19,9 @@ pub struct Movement {
 
 #[derive(Component)]
 pub struct Tree;
+
+#[derive(Component)]
+pub struct Collider;
 
 #[derive(Component)]
 pub struct Velocity(Vec2);
@@ -41,7 +45,7 @@ pub fn setup(mut commands: Commands) {
             free_move: true,
             destination: Vec2::new(PLAYER_X, GROUND_LEVEL),
         },
-        Velocity(Vec2::ZERO)
+        Velocity(Vec2::ZERO),
     ));
 
     // One tree?
@@ -53,7 +57,8 @@ pub fn setup(mut commands: Commands) {
             anchor: Anchor::Center,
             ..default()
         },
-        Transform::from_xyz(PLAYER_X, GROUND_LEVEL, 0.0),
+        Transform::from_xyz(PLAYER_X + 100.0, GROUND_LEVEL, 0.0),
+        Collider
     ));
 }
 
@@ -137,4 +142,41 @@ pub fn update_camera(
 
     camera_transform.translation.x = player_transform.translation.x.lerp(camera_transform.translation.x, 0.95);
     camera_transform.translation.y = player_transform.translation.y.lerp(camera_transform.translation.y, 0.95);
+}
+
+pub fn check_for_collisions(
+    mut player_query: Query<(&Transform, &mut Velocity, &mut Sprite), With<Player>>,
+    collider_query: Query<(&Transform), With<Collider>>,
+)
+{
+    for collider_transform in collider_query.iter() {
+        let mut player = player_query.single_mut();
+
+        // Hardcode radius numbers and just use bounding circles for now.
+        let collision = did_player_collide(
+            BoundingCircle::new(player.0.translation.truncate(), 25.0),
+            BoundingCircle::new(collider_transform.translation.truncate(), 25.0),
+        );
+
+        // Collision detection just changes color for now.
+        if collision {
+            player.2.color = Color::srgb(1.0, 0.0, 0.0);
+        } else {
+            player.2.color = Color::srgb(0.7, 0.7, 0.0);
+        }
+    }
+}
+
+fn did_player_collide (
+    player: BoundingCircle,
+    bounding_box: BoundingCircle,
+) -> bool
+{
+    let mut collided = false;
+
+    if player.intersects(&bounding_box) {
+        collided = true;
+    }
+
+    collided
 }
