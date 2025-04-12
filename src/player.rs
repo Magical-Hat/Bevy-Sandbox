@@ -93,23 +93,33 @@ pub fn handle_mouse_input(
 {
     for mut movement in query.iter_mut() {
         if buttons.pressed(MouseButton::Left) {
-            if let Some(mouse_position) = window.single().cursor_position() {
-                // Get the camera information
-                if let Ok((camera, camera_transform)) = cameras.get_single() {
-                    // Convert window coordinates to world coordinates
-                    if let Ok(world_position) = camera.viewport_to_world_2d(
-                        camera_transform,
-                        mouse_position
-                    ) {
-                        // A world position has been captured, free moving is disabled now while we're targeting a destination
-                        // to allow for a click move to interrupt a key press move.
-                        movement.destination = world_position;
-                        movement.free_move = false;
-                    }
+            // Get camera once instead of twice
+            if let Ok((camera, camera_transform)) = cameras.get_single() {
+                if let Some(mouse_position) = get_mouse_position_in_world(window.single(), camera, camera_transform)
+                {
+                    // A world position has been captured, free moving is disabled now while we're targeting a destination
+                    // to allow for a click move to interrupt a key press move.
+                    movement.destination = mouse_position;
+                    movement.free_move = false;
                 }
             }
         }
     }
+}
+
+fn get_mouse_position_in_world(window: &Window, camera: &Camera, camera_transform: &GlobalTransform) -> Option<Vec2>
+{
+    if let Some(mouse_position) = window.cursor_position() {
+        // Convert window coordinates to world coordinates
+        if let Ok(world_position) = camera.viewport_to_world_2d(
+            camera_transform,
+            mouse_position
+        ) {
+            return Some(Vec2::new(world_position.x, world_position.y));
+        }
+    }
+
+    None
 }
 
 pub fn update_movement(
